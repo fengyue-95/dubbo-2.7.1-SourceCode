@@ -34,6 +34,7 @@ import java.util.List;
  *
  * <a href="http://en.wikipedia.org/wiki/Fail-safe">Fail-safe</a>
  *
+ * 失败安全，出现异常时，直接忽略。通常用于写入审计日志等操作。
  */
 public class FailsafeClusterInvoker<T> extends AbstractClusterInvoker<T> {
     private static final Logger logger = LoggerFactory.getLogger(FailsafeClusterInvoker.class);
@@ -49,6 +50,7 @@ public class FailsafeClusterInvoker<T> extends AbstractClusterInvoker<T> {
             Invoker<T> invoker = select(loadbalance, invocation, invokers, null);
             return invoker.invoke(invocation);
         } catch (Throwable e) {
+            //主要区别在于调用异常，会记录日志，并且返回新RpcResult对象
             logger.error("Failsafe ignore exception: " + e.getMessage(), e);
             return new RpcResult(); // ignore
         }

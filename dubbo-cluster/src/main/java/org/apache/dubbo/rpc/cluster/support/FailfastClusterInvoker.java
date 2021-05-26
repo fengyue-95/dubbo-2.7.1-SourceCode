@@ -32,7 +32,7 @@ import java.util.List;
  * Usually used for non-idempotent write operations
  *
  * <a href="http://en.wikipedia.org/wiki/Fail-fast">Fail-fast</a>
- *
+ * 快速失败 只发起一次调用，失败立即报错。通常用于非幂等性的写操作，比如新增记录。
  */
 public class FailfastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -43,8 +43,10 @@ public class FailfastClusterInvoker<T> extends AbstractClusterInvoker<T> {
     @Override
     public Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         checkInvokers(invokers, invocation);
+        //通过负载均衡找到合适的invoker，
         Invoker<T> invoker = select(loadbalance, invocation, invokers, null);
         try {
+            //发起掉用，失败就返回，不做其他任何处理
             return invoker.invoke(invocation);
         } catch (Throwable e) {
             if (e instanceof RpcException && ((RpcException) e).isBiz()) { // biz exception.

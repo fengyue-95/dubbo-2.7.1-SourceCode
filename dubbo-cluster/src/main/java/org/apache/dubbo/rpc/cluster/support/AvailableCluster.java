@@ -29,6 +29,7 @@ import java.util.List;
 /**
  * AvailableCluster
  *
+ * 有一个服务可用，就返回相应的调用结果
  */
 public class AvailableCluster implements Cluster {
 
@@ -40,6 +41,7 @@ public class AvailableCluster implements Cluster {
         return new AbstractClusterInvoker<T>(directory) {
             @Override
             public Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
+                //这里会遍历所有的invokers，只要invoker可用，就直接返回
                 for (Invoker<T> invoker : invokers) {
                     if (invoker.isAvailable()) {
                         return invoker.invoke(invocation);

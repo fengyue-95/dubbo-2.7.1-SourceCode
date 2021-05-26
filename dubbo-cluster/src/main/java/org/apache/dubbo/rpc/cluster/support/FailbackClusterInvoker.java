@@ -41,6 +41,8 @@ import java.util.concurrent.TimeUnit;
  * Especially useful for services of notification.
  *
  * <a href="http://en.wikipedia.org/wiki/Failback">Failback</a>
+ *
+ * 失败自动恢复，后台记录失败请求，定时重发。通常用于消息通知操作。
  */
 public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -80,6 +82,7 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 }
             }
         }
+        //使用timer，对失败的请求进行重新发送
         RetryTimerTask retryTimerTask = new RetryTimerTask(loadbalance, invocation, invokers, lastInvoker, retries, RETRY_FAILED_PERIOD);
         try {
             failTimer.newTimeout(retryTimerTask, RETRY_FAILED_PERIOD, TimeUnit.SECONDS);
@@ -93,11 +96,14 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
         Invoker<T> invoker = null;
         try {
             checkInvokers(invokers, invocation);
+            //这里通过负载均衡策略选择一个invoker
             invoker = select(loadbalance, invocation, invokers, null);
+            //方法调用
             return invoker.invoke(invocation);
         } catch (Throwable e) {
             logger.error("Failback to invoke method " + invocation.getMethodName() + ", wait for retry in background. Ignored exception: "
                     + e.getMessage() + ", ", e);
+            //这里是重点，将失败的请求收集起来
             addFailed(loadbalance, invocation, invokers, invoker);
             return new RpcResult(); // ignore
         }
