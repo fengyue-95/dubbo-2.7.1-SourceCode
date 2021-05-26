@@ -384,6 +384,9 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
             }
         }
 
+        //启动时检查默认开始的，dubbo有可以指定不同类型的注册中心
+        //shouldcheck()根据传入的参数值作为参考，不传默认为true
+        //isAvailable()其实就是去注册中心判定服务是否可用，举例org.apache.dubbo.registry.redis.RedisRegistry.isAvailable
         if (shouldCheck() && !invoker.isAvailable()) {
             // make it possible for consumer to retry later if provider is temporarily unavailable
             initialized = false;
