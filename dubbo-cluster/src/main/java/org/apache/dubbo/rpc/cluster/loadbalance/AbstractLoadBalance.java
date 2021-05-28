@@ -64,6 +64,10 @@ public abstract class AbstractLoadBalance implements LoadBalance {
      * @param invoker    the invoker
      * @param invocation the invocation of this invoker
      * @return weight
+     *
+     * 会根据方法的预热结果进行权重计算，如果没过预热时间，那么重新计算出来的权重就比实际的小。
+     * 如果服务提供者已经过了预热期，则这时就会按照用户设置的权重的大小来选择使用哪个服务提供者。
+     *
      */
     protected int getWeight(Invoker<?> invoker, Invocation invocation) {
         int weight = invoker.getUrl().getMethodParameter(invocation.getMethodName(), Constants.WEIGHT_KEY, Constants.DEFAULT_WEIGHT);
