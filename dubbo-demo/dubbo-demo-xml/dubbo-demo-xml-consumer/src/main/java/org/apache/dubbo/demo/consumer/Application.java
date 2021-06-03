@@ -26,6 +26,7 @@ public class Application {
      * launch the application
      */
     public static void main(String[] args) {
+        System.setProperty("java.net.preferIPv4Stack", "true");
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring/dubbo-consumer.xml");
         context.start();
         DemoService demoService = context.getBean("demoService", DemoService.class);
